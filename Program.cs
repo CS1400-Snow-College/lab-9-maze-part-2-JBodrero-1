@@ -9,7 +9,9 @@ int locFromLeft = 0;    //  Set location variables.
 int locFromTop = 0;
 int proposedFromLeft = 0;
 int proposedFromTop = 0;
-
+int score = 0;
+int bad1FromLeft = 0;
+int bad1FromTop = 0;
 
 
 Console.Clear();        //  Give instructions
@@ -31,8 +33,8 @@ Console.Clear();
 
 
 //  Start character at top left and draw maze
-DrawMaze(locFromLeft, locFromTop, mazeChar);
-Console.SetCursorPosition(0, 0);
+DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
+Console.SetCursorPosition(0, 02);    //Start 2 lines down to show score and time.
 Console.Write("@");     //  Mark character location.
 ConsoleKeyInfo keyIn;
 Console.CursorVisible = false;  //  Hide cursor for game play.
@@ -46,6 +48,8 @@ do
         Console.WriteLine("\nThanks for playing.  Goodbye.");
         break;
     }
+
+
     else if (keyIn.Key == ConsoleKey.RightArrow) //  Right arrow move
     {
         proposedFromLeft = locFromLeft + 1;
@@ -53,7 +57,7 @@ do
         if (TryMove(proposedFromLeft, proposedFromTop, mazeChar))    // Check valid move.
         {
             locFromLeft++;
-            DrawMaze(locFromLeft, locFromTop, mazeChar);
+            DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
         }
     }
     else if (keyIn.Key == ConsoleKey.LeftArrow) //  Left arrow move
@@ -63,48 +67,79 @@ do
         if (TryMove(proposedFromLeft, proposedFromTop, mazeChar))    // Check valid move.
         {
             locFromLeft--;
-            DrawMaze(locFromLeft, locFromTop, mazeChar);
+            DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
         }
     }
     else if (keyIn.Key == ConsoleKey.UpArrow) //  Up arrow move
     {
-        proposedFromLeft = locFromLeft ;
+        proposedFromLeft = locFromLeft;
         proposedFromTop = locFromTop - 1;
         if (TryMove(proposedFromLeft, proposedFromTop, mazeChar))    // Check valid move.
         {
             locFromTop--;
-            DrawMaze(locFromLeft, locFromTop, mazeChar);
+
+            DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
         }
     }
     else if (keyIn.Key == ConsoleKey.DownArrow) //  Down arrow move
     {
-        proposedFromLeft = locFromLeft ;
+        proposedFromLeft = locFromLeft;
         proposedFromTop = locFromTop + 1;
         if (TryMove(proposedFromLeft, proposedFromTop, mazeChar))    // Check valid move.
         {
             locFromTop++;
-            DrawMaze(locFromLeft, locFromTop, mazeChar);
+            DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
         }
     }
-    if (mazeChar[locFromTop] [locFromLeft] == '*')   //  Detect win.
+
+    if (mazeChar[locFromTop][locFromLeft] == '*')   //  Detect win.
     {
         watch.Stop();   //  Stop watch and compute time to complete.
         Console.Clear();
-        Console.WriteLine($"Congratulations!  You completed the maze in {watch.ElapsedMilliseconds/1000} seconds.");
+        Console.WriteLine($"Congratulations!  You completed the maze in {watch.ElapsedMilliseconds / 1000} seconds.");
         break;
     }
+
+    if (mazeChar[locFromTop][locFromLeft] == '^')   //  Detect coin.
+    {
+        score = score + 100;
+        mazeChar[locFromTop][locFromLeft] = ' ';    //  Collect coin
+    }
+
+    if (mazeChar[locFromTop][locFromLeft] == '$')   //  Detect gem.
+    {
+        score = score + 200;
+        mazeChar[locFromTop][locFromLeft] = ' ';    //  Collect gem
+    }
+    
+    if (score == 1000)                              //  Open gate
+    {
+        mazeChar[09][18] = ' ';
+        mazeChar[10][18] = ' ';
+        mazeChar[11][18] = ' ';
+    }
+    if (mazeChar[locFromTop][locFromLeft] == '%')   //  Detect loss.
+        {
+            watch.Stop();   //  Stop watch and compute time to complete.
+            Console.Clear();
+            Console.WriteLine($"Sorry, you lose.");
+            break;
+        }
 }
 while (keyIn.Key != ConsoleKey.Escape); //  Play game while any key but escape
 
 Console.CursorVisible = true;   //  Make cursor visible in console after game.
 
 
-static void DrawMaze(int fromLeft, int fromTop, char[][] mazeChar)   //  Method to draw maze.
+static void DrawMaze(int fromLeft, int fromTop, char[][] mazeChar, int score, Stopwatch watch)   //  Method to draw maze.
 {
+
     int maxWidth = mazeChar[0].Length;
     int maxHeight = mazeChar.Length;
 
     Console.Clear();
+    Console.WriteLine($"Score = {score} \nTime: {watch.ElapsedMilliseconds / 1000} seconds."); // Track score and time.
+
     for (int i = 0; i < maxHeight; i++)
     {
         foreach (char c in mazeChar[i])
@@ -114,7 +149,7 @@ static void DrawMaze(int fromLeft, int fromTop, char[][] mazeChar)   //  Method 
         }
         Console.WriteLine("");
     }
-    Console.SetCursorPosition(fromLeft, fromTop);
+    Console.SetCursorPosition(fromLeft, fromTop+2);
     Console.Write("@");
 }
 
