@@ -4,14 +4,16 @@
 
 using System.Diagnostics;  //  Allows stopwatch functionality
 Stopwatch watch = new Stopwatch();
+Random rand1 = new Random();
+
 
 int locFromLeft = 0;    //  Set location variables.
 int locFromTop = 0;
 int proposedFromLeft = 0;
 int proposedFromTop = 0;
 int score = 0;
-int bad1FromLeft = 0;
-int bad1FromTop = 0;
+int bad1FromLeft = 15;
+int bad1FromTop = 5;
 
 
 Console.Clear();        //  Give instructions
@@ -29,13 +31,21 @@ int mazeWidth = mazeChar[0].Length;
 int mazeHeight = mazeChar.Length;
 
 Console.ReadKey(true);      //  Checks for key to start maze
-Console.Clear();        
+Console.Clear();
 
 
 //  Start character at top left and draw maze
+//mazeChar[locFromTop][locFromLeft] = '@';
+//mazeChar[bad1FromTop][bad1FromLeft] = '%';
+
 DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
-Console.SetCursorPosition(0, 02);    //Start 2 lines down to show score and time.
+Console.SetCursorPosition(0, 2);
 Console.Write("@");     //  Mark character location.
+Console.SetCursorPosition(bad1FromLeft, bad1FromTop+2);
+Console.Write("%");     //  Mark bad guy 1 location.
+
+//DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
+
 ConsoleKeyInfo keyIn;
 Console.CursorVisible = false;  //  Hide cursor for game play.
 watch.Start();      // Start watch
@@ -48,8 +58,7 @@ do
         Console.WriteLine("\nThanks for playing.  Goodbye.");
         break;
     }
-
-
+    //  Move main character
     else if (keyIn.Key == ConsoleKey.RightArrow) //  Right arrow move
     {
         proposedFromLeft = locFromLeft + 1;
@@ -111,21 +120,62 @@ do
         score = score + 200;
         mazeChar[locFromTop][locFromLeft] = ' ';    //  Collect gem
     }
-    
+
     if (score == 1000)                              //  Open gate
     {
         mazeChar[09][18] = ' ';
         mazeChar[10][18] = ' ';
         mazeChar[11][18] = ' ';
     }
-    if (mazeChar[locFromTop][locFromLeft] == '%')   //  Detect loss.
-        {
-            watch.Stop();   //  Stop watch and compute time to complete.
-            Console.Clear();
-            Console.WriteLine($"Sorry, you lose.");
+    //  Move bad guy 1;
+    //bool bad1MoveSuccess = false;
+    int rand1move = rand1.Next(1, 5);
+    switch (rand1move)
+    {
+        case 1:     //  Move bad guy 1 to the right, if valid move.  Otherwise he stays put.
+            if (TryMove(bad1FromLeft+1, bad1FromTop, mazeChar) == true)
+            {
+                mazeChar[bad1FromTop][bad1FromLeft] = ' ';
+                bad1FromLeft++;
+                mazeChar[bad1FromTop][bad1FromLeft] = '%';
+            }
             break;
-        }
+        case 2:     //  Move bad guy 1 to the right
+            if (TryMove(bad1FromLeft-1, bad1FromTop, mazeChar) == true)
+            {
+                mazeChar[bad1FromTop][bad1FromLeft] = ' ';
+                bad1FromLeft--;
+                mazeChar[bad1FromTop][bad1FromLeft] = '%';
+            }
+            break;
+        case 3:     //  Move bad guy 1 up
+            if (TryMove(bad1FromLeft, bad1FromTop-1, mazeChar) == true)
+            {
+                mazeChar[bad1FromTop][bad1FromLeft] = ' ';
+                bad1FromTop--;
+                mazeChar[bad1FromTop][bad1FromLeft] = '%';
+            }
+            break;
+        case 4:     //  Move bad guy 1 down
+            if (TryMove(bad1FromLeft, bad1FromTop+1, mazeChar) == true)
+            {
+                mazeChar[bad1FromTop][bad1FromLeft] = ' ';
+                bad1FromTop++;
+                mazeChar[bad1FromTop][bad1FromLeft] = '%';
+            }
+            break;
+        
+    }
+
+    if (mazeChar[locFromTop][locFromLeft] == '%')   //  Detect loss.
+    {
+        watch.Stop();   //  Stop watch and compute time to complete.
+        Console.Clear();
+        Console.WriteLine($"Sorry, you lose.");
+        break;
+    }
 }
+
 while (keyIn.Key != ConsoleKey.Escape); //  Play game while any key but escape
 
 Console.CursorVisible = true;   //  Make cursor visible in console after game.
@@ -167,7 +217,7 @@ static bool TryMove(int proposedLeft, int proposedTop, char [][] mazeChar)  // C
     {
         return false;
     }
-    else if (mazeChar[proposedTop][proposedLeft] == '#' || mazeChar[proposedTop][proposedLeft] == '|' )//  Enforce walls.
+    else if (mazeChar[proposedTop][proposedLeft] == '#' || mazeChar[proposedTop][proposedLeft] == '|' || mazeChar[proposedTop][proposedLeft] == '%' )//  Enforce walls.
     {
         return false;
     }
