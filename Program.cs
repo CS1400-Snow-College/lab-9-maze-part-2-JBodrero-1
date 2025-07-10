@@ -5,7 +5,7 @@
 using System.Diagnostics;  //  Allows stopwatch functionality
 Stopwatch watch = new Stopwatch();
 Random rand1 = new Random();
-
+Random rand2 = new Random();
 
 int locFromLeft = 0;    //  Set location variables.
 int locFromTop = 0;
@@ -14,6 +14,8 @@ int proposedFromTop = 0;
 int score = 0;
 int bad1FromLeft = 15;
 int bad1FromTop = 5;
+int bad2FromLeft = 38;
+int bad2FromTop = 15;
 
 
 Console.Clear();        //  Give instructions
@@ -43,8 +45,10 @@ Console.SetCursorPosition(0, 2);
 Console.Write("@");     //  Mark character location.
 Console.SetCursorPosition(bad1FromLeft, bad1FromTop+2);
 Console.Write("%");     //  Mark bad guy 1 location.
-
-//DrawMaze(locFromLeft, locFromTop, mazeChar, score, watch);
+Console.SetCursorPosition(bad2FromLeft, bad2FromTop+2);
+Console.Write("%");     //  Mark bad guy 2 location.
+mazeChar[bad1FromTop][bad1FromLeft] = '%';
+mazeChar[bad2FromTop][bad2FromLeft] = '%';
 
 ConsoleKeyInfo keyIn;
 Console.CursorVisible = false;  //  Hide cursor for game play.
@@ -128,20 +132,19 @@ do
         mazeChar[11][18] = ' ';
     }
     //  Move bad guy 1;
-    //bool bad1MoveSuccess = false;
-    int rand1move = rand1.Next(1, 5);
+   int rand1move = rand1.Next(1, 5);
     switch (rand1move)
     {
         case 1:     //  Move bad guy 1 to the right, if valid move.  Otherwise he stays put.
-            if (TryMove(bad1FromLeft+1, bad1FromTop, mazeChar) == true)
+            if (TryMoveBad(bad1FromLeft+1, bad1FromTop, mazeChar) == true)
             {
                 mazeChar[bad1FromTop][bad1FromLeft] = ' ';
                 bad1FromLeft++;
                 mazeChar[bad1FromTop][bad1FromLeft] = '%';
             }
             break;
-        case 2:     //  Move bad guy 1 to the right
-            if (TryMove(bad1FromLeft-1, bad1FromTop, mazeChar) == true)
+        case 2:     //  Move bad guy 1 to the left
+            if (TryMoveBad(bad1FromLeft-1, bad1FromTop, mazeChar) == true)
             {
                 mazeChar[bad1FromTop][bad1FromLeft] = ' ';
                 bad1FromLeft--;
@@ -149,7 +152,7 @@ do
             }
             break;
         case 3:     //  Move bad guy 1 up
-            if (TryMove(bad1FromLeft, bad1FromTop-1, mazeChar) == true)
+            if (TryMoveBad(bad1FromLeft, bad1FromTop-1, mazeChar) == true)
             {
                 mazeChar[bad1FromTop][bad1FromLeft] = ' ';
                 bad1FromTop--;
@@ -157,11 +160,50 @@ do
             }
             break;
         case 4:     //  Move bad guy 1 down
-            if (TryMove(bad1FromLeft, bad1FromTop+1, mazeChar) == true)
+            if (TryMoveBad(bad1FromLeft, bad1FromTop+1, mazeChar) == true)
             {
                 mazeChar[bad1FromTop][bad1FromLeft] = ' ';
                 bad1FromTop++;
                 mazeChar[bad1FromTop][bad1FromLeft] = '%';
+            }
+            break;
+        
+    }
+    //  Move bad guy 2;
+    
+    int rand2move = rand2.Next(1, 5);
+    switch (rand2move)
+    {
+        case 1:     //  Move bad guy 2 to the right, if valid move.  Otherwise he stays put.
+            if (TryMoveBad(bad2FromLeft+1, bad2FromTop, mazeChar) == true)
+            {
+                mazeChar[bad2FromTop][bad2FromLeft] = ' ';
+                bad2FromLeft++;
+                mazeChar[bad2FromTop][bad2FromLeft] = '%';
+            }
+            break;
+        case 2:     //  Move bad guy 2 to the left
+            if (TryMoveBad(bad2FromLeft-1, bad2FromTop, mazeChar) == true)
+            {
+                mazeChar[bad2FromTop][bad2FromLeft] = ' ';
+                bad2FromLeft--;
+                mazeChar[bad2FromTop][bad2FromLeft] = '%';
+            }
+            break;
+        case 3:     //  Move bad guy 2 up
+            if (TryMoveBad(bad2FromLeft, bad2FromTop-1, mazeChar) == true)
+            {
+                mazeChar[bad2FromTop][bad2FromLeft] = ' ';
+                bad2FromTop--;
+                mazeChar[bad2FromTop][bad2FromLeft] = '%';
+            }
+            break;
+        case 4:     //  Move bad guy 2 down
+            if (TryMoveBad(bad2FromLeft, bad2FromTop+1, mazeChar) == true)
+            {
+                mazeChar[bad2FromTop][bad2FromLeft] = ' ';
+                bad2FromTop++;
+                mazeChar[bad2FromTop][bad2FromLeft] = '%';
             }
             break;
         
@@ -224,4 +266,23 @@ static bool TryMove(int proposedLeft, int proposedTop, char [][] mazeChar)  // C
     else { return true; }   //  If valid move, proceed.
 }
 
+static bool TryMoveBad(int proposedLeft, int proposedTop, char [][] mazeChar)  // Check if move is valid.
+{
+    int maxWidth = mazeChar[0].Length;
+    int maxHeight = mazeChar.Length;
+
+    if (proposedLeft < 0 || proposedLeft > maxWidth)    //  If outside of width, do nothing
+    {
+        return false;
+    }
+    else if (proposedTop < 0 || proposedTop >= maxHeight - 1)  //  If outside of height, do nothing
+    {
+        return false;
+    }
+    else if (mazeChar[proposedTop][proposedLeft] == '#' || mazeChar[proposedTop][proposedLeft] == '|' || mazeChar[proposedTop][proposedLeft] == '%' || mazeChar[proposedTop][proposedLeft] == '^' )//  Enforce walls & coins.
+    {
+        return false;
+    }
+    else { return true; }   //  If valid move, proceed.
+}
 
